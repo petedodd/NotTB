@@ -1,0 +1,28 @@
+* Meta-analysis of 'Not TB' among presumptive TB
+
+This is the statistical and reproducibility appendix to:
+
+Patients with presumed tuberculosis in sub-Saharan Africa that are not diagnosed with tuberculosis: a systematic review and meta-analysis
+
+S Jayasooriya,
+F Dimambro-Denson,
+C Beecroft,
+J Balen,
+B Awokola,
+C Mitchell,
+B Kampmann,
+F Campbell,
+PJ Dodd,
+K Mortimer
+
+
+This repo contains data and analysis script, which can also be compiled to the publication appendix.
+
+
+* License
+
+This work is licensed under a Creative Commons Attribution 4.0 International License
+
+http://creativecommons.org/licenses/by/4.0/
+
+[[http://creativecommons.org/licenses/by/4.0/][https://i.creativecommons.org/l/by/4.0/88x31.png]]
