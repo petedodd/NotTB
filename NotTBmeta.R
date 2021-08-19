@@ -1,5 +1,5 @@
 #' ---
-#' title: 'Patients with presumed tuberculosis in sub-Saharan Africa that are not diagnosed with tuberculosis: a systematic review and meta-analysis (Appendix)'
+#' title: 'Patients with presumed tuberculosis in sub-Saharan Africa that are not diagnosed with tuberculosis: a systematic review and meta-analysis (statistical appendix)'
 #' author:
 #' - S Jayasooriya,
 #' - F Dimambro-Denson,
@@ -63,7 +63,8 @@ knitr::kable(dI)
 #'
 #' where $k=1,\dots,S$ indexes the numbers of studies.
 #' 
-#' link to paper
+#' Use of arcinse or double arcsine transformations has been criticized in this context, with the binomial model above recommended.^[link to [paper](link) ]
+#' 
 #' check formulae
 #'
 
@@ -200,7 +201,56 @@ ggsave(SA,file=here('output/ForestPlot.eps'),h=13,w=12)
 #'
 #' # Meta-regressions
 #'
-#' TODO add+annotate from other file
+#' ## TB prevalence
+#'
+#' The burden of TB in a population might reasonably be expected to influence the proportion of presumptive TB that is not TB.
+#'
+DD[,tb:=`WHO TB estimate (per 100 000 year of study)`]
+
+ggplot(DD,aes(tb,`NotTB Proportion`,
+              size=N,col=mode,shape=clinical))+
+    scale_x_continuous(label=comma,limits=c(0,NA))+
+    scale_y_continuous(label=percent,limits=c(0,1))+
+    geom_point()+
+    xlab('WHO estimate of TB prevalence per 100,000 for country-year')+
+    ylab('Proportion not TB in study')+
+    ggtitle('Influence of population TB burden')
+
+#' We can formally investigating the influence of TB burden in explaining heterogeneity with a meta-regression:
+tbmr <-  rma(measure = "PLO",  #binomial w/ logit link
+              xi = NnotTB,     # numerator
+              ni = N,          # denominator
+              data = DD,        # what data to use
+              mods = ~mode*clinical + tb)
+summary(tbmr)
+
+
+#'
+#' ## HIV prevalence
+#'
+#' Population HIV prevalence may plausibly influence the proportion of presumptives not diagnosed with TB both by inluencing TB burden, but also by changing the typical clinical characteristics of TB and most importantly, the burden of other illness that could be designated presumptive TB.
+#'
+#' 
+#'
+ggplot(DD,aes(hiv/1e2,`NotTB Proportion`,
+              size=N,col=mode,shape=clinical))+
+    scale_x_continuous(label=percent,limits=c(0,0.13))+
+    scale_y_continuous(label=percent,limits=c(0,1))+
+    geom_point()+
+    xlab('UNAIDS estimate of HIV prevalence 15-49 for country-year')+
+    ylab('Proportion not TB in study')+
+    ggtitle('Influence of population HIV prevalence')
+
+
+#' We can formally investigating the influence of HIV in explaining heterogeneity with a meta-regression:
+hivmr <-  rma(measure = "PLO",  #binomial w/ logit link
+               xi = NnotTB,     # numerator
+               ni = N,          # denominator
+               data = DD,        # what data to use
+               mods = ~mode*clinical + hiv)
+summary(hivmr)
+
+
 #'
 #' # Sensitivity analyses
 #'
