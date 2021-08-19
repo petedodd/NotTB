@@ -63,7 +63,7 @@ knitr::kable(dI)
 #'
 #' where $k=1,\dots,S$ indexes the numbers of studies.
 #' 
-#' Use of arcinse or double arcsine transformations has been criticized in this context, with the binomial model above recommended.^[link to [paper](link) ]
+#' Use of arcinse or double arcsine transformations has been criticized in this context, with the binomial model above recommended.^[[Seriously misleading results using inverse of Freeman-Tukey double arcsine transformation in meta-analysis of single proportions](https://onlinelibrary.wiley.com/doi/10.1002/jrsm.1348) by Schwarzer et al. ]
 #' 
 #' check formulae
 #'
@@ -254,14 +254,31 @@ summary(hivmr)
 #'
 #' # Sensitivity analyses
 #'
+#' ## Dorman et al. by country only
+#'
+#' In the main analysis, we considered the different sites in the 2018 study by Dorman et al to be separate data. This included considering the two sites in South Africa - Cape Town and Johannesburg - as different, which was motivated by the very distinct TB epidemiology in the Western Cape. Here we investigate the impact of aggregating the two South African sites in Dorman et al on the meta-analysis for studies with passive case finding excluding clinically diagnosed TB.
+#'
+#' Restrict to relevant data & aggregate over Dorman in South Africa:
+tmp <- DD[mode=='Passive' & clinical=='(No unconfirmed TB)']
+tmp[,Country.Simple:=gsub(" \\-.+$","",Country)]                    #remove cities
+tmp[,authorcountry:=paste(gsub("^([A-Za-z]+).*","\\1",Author),Country.Simple,sep = ", ")] #new label
+tmp <- tmp[,.(NnotTB=sum(NnotTB),N=sum(N)),by=authorcountry]
+knitr::kable(tmp) #check
+
+#' Rerun this meta-analysis with the new data:
+maPNsa <- rma(measure = "PLO", # binomial w/ logit link
+            xi = NnotTB,     # numerator
+            ni = N,          # denominator
+            data =tmp,       # new data
+            slab = authorcountry)      # what to use as labels on graphs
+summary(maPNsa)
+forest(maPNsa,transf = transf.ilogit,refline=NA)
+
+#'
+#'This is very similary to the main analysis above.
+#'
 #' ## Regional groupings
 #'
 #' TODO
 #'
-#' ## Dorman by country
-#'
-#' TODO
-#' 
-#' Grouping blah as a single study
-#' 
 
