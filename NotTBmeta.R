@@ -171,6 +171,8 @@ B[,mode:=factor(mode,levels=c('Passive','Active'),ordered = TRUE)]
 B[,clinical.g:=factor(clinical.g,levels=unique(clinical.g))]
 labdat <- B[1]
 labdat[,txt:=' weight (%)']
+labdat2 <- B[1]
+labdat2[,txt:='prevalence (95% confidence interval)']
 
 #' Create publication forest plot figure:
 SA <- ggplot(B,aes(lab,y=`NotTB Proportion`,
@@ -197,6 +199,7 @@ SA <- ggplot(B,aes(lab,y=`NotTB Proportion`,
     geom_text(aes(x=lab,y=1.2,label=CI,hjust='right')) +
     geom_text(aes(x=lab,y=0.0,label=wt))+
     geom_text(data=labdat,aes(x=9.5,y=0,label=txt))+
+    geom_text(data=labdat2,aes(x=9.5,y=1.0,label=txt))+
     ggpubr::grids()
 
 ggsave(SA,file=here('output/ForestPlot.pdf'),h=13,w=12)
