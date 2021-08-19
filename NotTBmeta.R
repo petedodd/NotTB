@@ -53,8 +53,9 @@ knitr::kable(dI)
 
 
 #'
-#' # Main analysis
+#' # Main analyses
 #'
+#' ## Approach
 #' We use a random-effects meta-analysis assuming a binomial response and logit link.
 #'
 #' $$k_i\sim \mathrm{Binomial}(N_i,p_i)$$
@@ -63,7 +64,7 @@ knitr::kable(dI)
 #'
 #' where $k=1,\dots,S$ indexes the numbers of studies.
 #' 
-#' Use of arcinse or double arcsine transformations has been criticized in this context, with the binomial model above recommended.^[[Seriously misleading results using inverse of Freeman-Tukey double arcsine transformation in meta-analysis of single proportions](https://onlinelibrary.wiley.com/doi/10.1002/jrsm.1348) by Schwarzer et al. ]
+#' Use of arcinse or double arcsine transformations has been criticized in this context, with the binomial model above recommended.^[[Seriously misleading results using inverse of Freeman-Tukey double arcsine transformation in meta-analysis of single proportions](https://onlinelibrary.wiley.com/doi/10.1002/jrsm.1348), by Schwarzer et al. ]
 #' 
 #' check formulae
 #'
@@ -81,6 +82,9 @@ DD[,`NotTB Proportion`:=NnotTB/N]
 for(i in 1:nrow(DD)){ DD[i,c('lo','hi'):=ciz(NnotTB,N)]; }
 DD[,SE:=(hi-lo)/3.92]
 
+#'
+#' ## Meta-analyses
+#' 
 #' Meta-analysis for passively found TB patients with bacteriologically unconfirmed TB included:
 maPU <- rma(measure = "PLO", #  binomial w/ logit link
             xi = NnotTB,     # numerator
@@ -116,6 +120,9 @@ mup <- predict(maPU,transf = transf.ilogit)
 mnp <- predict(maPN,transf = transf.ilogit)
 
 
+#'
+#' ## Creation of combined forest plot
+#' 
 #' Summary data for combined forest plot:
 f1 <- function(x)format(round(x,1),nsmall=1)
 cnz <- c('(Unconfirmed TB included)',
@@ -201,6 +208,8 @@ ggsave(SA,file=here('output/ForestPlot.eps'),h=13,w=12)
 #'
 #' # Meta-regressions
 #'
+#' In this section we consider various potential sources of heterogeneity through scatter plots and meta-regression.
+#'
 #' ## TB prevalence
 #'
 #' The burden of TB in a population might reasonably be expected to influence the proportion of presumptive TB that is not TB.
@@ -250,6 +259,30 @@ hivmr <-  rma(measure = "PLO",  #binomial w/ logit link
                mods = ~mode*clinical + hiv)
 summary(hivmr)
 
+#'
+#' ## Calendar time
+#'
+#' To explore whether there has been any change over time, we consider calendar year
+#'
+#'
+ggplot(DD,aes(Year,`NotTB Proportion`,
+              size=N,col=mode,shape=clinical))+
+    ## scale_x_continuous(label=percent,limits=c(0,0.13))+
+    scale_y_continuous(label=percent,limits=c(0,1))+
+    geom_point()+
+    xlab('Study year')+
+    ylab('Proportion not TB in study')+
+    ggtitle('Influence of calendar year')
+
+
+#' We can formally investigating the influence of year in explaining heterogeneity with a meta-regression:
+yearmr <-  rma(measure = "PLO",  #binomial w/ logit link
+               xi = NnotTB,     # numerator
+               ni = N,          # denominator
+               data = DD,        # what data to use
+               mods = ~mode*clinical + Year)
+summary(yearmr)
+
 
 #'
 #' # Sensitivity analyses
@@ -275,7 +308,7 @@ summary(maPNsa)
 forest(maPNsa,transf = transf.ilogit,refline=NA)
 
 #'
-#'This is very similary to the main analysis above.
+#'This is very similar to the main analysis above.
 #'
 #' ## Regional groupings
 #'
