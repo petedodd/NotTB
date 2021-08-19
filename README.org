@@ -2,7 +2,9 @@
 
 This is the statistical and reproducibility appendix to:
 
+#+BEGIN_QUOTE
 Patients with presumed tuberculosis in sub-Saharan Africa that are not diagnosed with tuberculosis: a systematic review and meta-analysis
+#+END_QUOTE
 
 S Jayasooriya,
 F Dimambro-Denson,
