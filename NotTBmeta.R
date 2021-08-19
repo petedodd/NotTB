@@ -20,7 +20,7 @@
 
 #' # Pre-amble
 #'
-#' This document is generated from an R script in literate programming fashion. Some code, output and figures are specified for inclusion of the output document. The script and data are publicly available on GitHub at  https://github.com/petedodd/NotTB and once the repository is downloaded, it should be possible to generate this document using R with the command
+#' This document is generated from an R script in literate programming fashion. All R code is quoted in this document, together with output (preceeded by '##') and figures. The article forest plot is saved to the `output` folder but not included in the document since it is too cramped. The script and data are publicly available on GitHub at  https://github.com/petedodd/NotTB and once the repository is downloaded, it should be possible to generate this document using R with the command
 #' `rmarkdown::render('NotTBmeta.R')` within R, or from a unix-like command line with `R -q -e "rmarkdown::render(\"NotTBmeta.R\",output_dir=\"./output\")"`. Alternatively, the R script can be run in whole or part as a conventional R script.
 #'
 #' ## Dependencies
@@ -56,17 +56,16 @@ knitr::kable(dI)
 #' # Main analyses
 #'
 #' ## Approach
-#' We use a random-effects meta-analysis assuming a binomial response and logit link.
+#' We use a generalized linear mixed effects (GLMM) approach to meta-analysis assuming a binomial response and logit link^[[Stijnen T, Hamza TH, Ozdemir P. Random effects meta-analysis of event outcome in the framework of the generalized linear mixed model with applications in sparse data. ](http://dx.doi.org/10.1002/sim.4040)]. This means we assume
 #'
 #' $$k_i\sim \mathrm{Binomial}(N_i,p_i)$$
 #' $$\mathrm{logit}(p_i) = \mu+\varepsilon_i $$
-#' $$ \varepsilon_i \sim \mathcal{N}(0,\sigma)$$
+#' $$ \varepsilon_i \sim \mathcal{N}(0,\tau^2)$$
 #'
-#' where $k=1,\dots,S$ indexes the numbers of studies.
+#' where $i=1,\dots,S$ indexes the numbers of studies.
+#'
+#' Use of arcsine or double arcsine transformations has been criticized in this context, with the GLMM.^[[Schwarzer G, Chemaitelly H, Abu-Raddad LJ, Rücker G. Seriously misleading results using inverse of Freeman-Tukey double arcsine transformation in meta-analysis of single proportions](https://onlinelibrary.wiley.com/doi/10.1002/jrsm.1348)]
 #' 
-#' Use of arcinse or double arcsine transformations has been criticized in this context, with the binomial model above recommended.^[[Seriously misleading results using inverse of Freeman-Tukey double arcsine transformation in meta-analysis of single proportions](https://onlinelibrary.wiley.com/doi/10.1002/jrsm.1348), by Schwarzer et al. ]
-#' 
-#' check formulae
 #'
 
 #' Read in the data and ensure that factors behave as intended:
@@ -86,7 +85,7 @@ DD[,SE:=(hi-lo)/3.92]
 #' ## Meta-analyses
 #' 
 #' Meta-analysis for passively found TB patients with bacteriologically unconfirmed TB included:
-maPU <- rma(measure = "PLO", #  binomial w/ logit link
+maPU <- rma.glmm(measure = "PLO", #  binomial w/ logit link
             xi = NnotTB,     # numerator
             ni = N,          # denominator
             data = DD[mode=='Passive' &
@@ -96,7 +95,7 @@ summary(maPU)
 forest(maPU,transf = transf.ilogit,refline=NA)
 
 #' Meta-analysis for passively found TB patients with bacteriologically unconfirmed TB excluded:
-maPN <- rma(measure = "PLO", #  binomial w/ logit link
+maPN <- rma.glmm(measure = "PLO", #  binomial w/ logit link
             xi = NnotTB,     # numerator
             ni = N,          # denominator
             data = DD[mode=='Passive' &
@@ -106,7 +105,7 @@ summary(maPN)
 forest(maPN,transf = transf.ilogit,refline=NA)
 
 #' Meta-analysis for actively found TB patients:
-maA <- rma(measure = "PLO", #  binomial w/ logit link
+maA <- rma.glmm(measure = "PLO", #  binomial w/ logit link
             xi = NnotTB,     # numerator
             ni = N,          # denominator
             data = DD[mode=='Active'],
@@ -226,7 +225,7 @@ ggplot(DD,aes(tb,`NotTB Proportion`,
     ggtitle('Influence of population TB burden')
 
 #' We can formally investigating the influence of TB burden in explaining heterogeneity with a meta-regression:
-tbmr <-  rma(measure = "PLO",  #binomial w/ logit link
+tbmr <-  rma.glmm(measure = "PLO",  #binomial w/ logit link
               xi = NnotTB,     # numerator
               ni = N,          # denominator
               data = DD,        # what data to use
@@ -252,7 +251,7 @@ ggplot(DD,aes(hiv/1e2,`NotTB Proportion`,
 
 
 #' We can formally investigating the influence of HIV in explaining heterogeneity with a meta-regression:
-hivmr <-  rma(measure = "PLO",  #binomial w/ logit link
+hivmr <-  rma.glmm(measure = "PLO",  #binomial w/ logit link
                xi = NnotTB,     # numerator
                ni = N,          # denominator
                data = DD,        # what data to use
@@ -267,7 +266,6 @@ summary(hivmr)
 #'
 ggplot(DD,aes(Year,`NotTB Proportion`,
               size=N,col=mode,shape=clinical))+
-    ## scale_x_continuous(label=percent,limits=c(0,0.13))+
     scale_y_continuous(label=percent,limits=c(0,1))+
     geom_point()+
     xlab('Study year')+
@@ -276,7 +274,7 @@ ggplot(DD,aes(Year,`NotTB Proportion`,
 
 
 #' We can formally investigating the influence of year in explaining heterogeneity with a meta-regression:
-yearmr <-  rma(measure = "PLO",  #binomial w/ logit link
+yearmr <-  rma.glmm(measure = "PLO",  #binomial w/ logit link
                xi = NnotTB,     # numerator
                ni = N,          # denominator
                data = DD,        # what data to use
@@ -299,7 +297,7 @@ tmp <- tmp[,.(NnotTB=sum(NnotTB),N=sum(N)),by=authorcountry]
 knitr::kable(tmp) #check
 
 #' Rerun this meta-analysis with the new data:
-maPNsa <- rma(measure = "PLO", # binomial w/ logit link
+maPNsa <- rma.glmm(measure = "PLO", # binomial w/ logit link
             xi = NnotTB,     # numerator
             ni = N,          # denominator
             data =tmp,       # new data
@@ -312,6 +310,27 @@ forest(maPNsa,transf = transf.ilogit,refline=NA)
 #'
 #' ## Regional groupings
 #'
-#' TODO
+#' Here we investigate whether country can explain some heterogeneity. Since when countries have occur only once, it is not possible to identify a country coefficient, we these countries into an "Other" category.
 #'
+DD[,Country.Group:=gsub(" \\-.+$","",Country)]                    #remove cities
+DD[!Country.Group %in% c("South Africa","Ethiopia","Nigeria"),Country.Group:="Other"] #group
+DD[,Country.Group:=factor(Country.Group,levels=unique(Country.Group))] #make factor
+
+#' Plot this data:
+ggplot(DD,aes(Country.Group,`NotTB Proportion`,
+              size=N,col=mode,shape=clinical))+
+    scale_y_continuous(label=percent,limits=c(0,1))+
+    geom_point()+
+    xlab('Country or country-group')+
+    ylab('Proportion not TB in study')+
+    ggtitle('Influence of region')
+
+
+#' Perform meta-regression on country-group:
+cgmr <-  rma.glmm(measure = "PLO",  #binomial w/ logit link
+               xi = NnotTB,     # numerator
+               ni = N,          # denominator
+               data = DD,        # what data to use
+               mods = ~mode*clinical + Country.Group)
+summary(cgmr)
 
