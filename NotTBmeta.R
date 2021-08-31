@@ -64,7 +64,7 @@ knitr::kable(dI)
 #'
 #' where $i=1,\dots,S$ indexes the numbers of studies.
 #'
-#' Use of arcsine or double arcsine transformations has been criticized in this context, with the GLMM.^[[Schwarzer G, Chemaitelly H, Abu-Raddad LJ, Rücker G. Seriously misleading results using inverse of Freeman-Tukey double arcsine transformation in meta-analysis of single proportions](https://onlinelibrary.wiley.com/doi/10.1002/jrsm.1348)]
+#' Use of arcsine or double arcsine transformations has been criticized in this context, with the GLMM approach recommended instead.^[[Schwarzer G, Chemaitelly H, Abu-Raddad LJ, Rücker G. Seriously misleading results using inverse of Freeman-Tukey double arcsine transformation in meta-analysis of single proportions](https://onlinelibrary.wiley.com/doi/10.1002/jrsm.1348)]
 #' 
 #'
 
@@ -217,12 +217,12 @@ ggsave(SA,file=here('output/ForestPlot.eps'),h=13,w=12)
 #' The burden of TB in a population might reasonably be expected to influence the proportion of presumptive TB that is not TB.
 #'
 DD[,tb:=`WHO TB estimate (per 100 000 year of study)`]
-
+a <- 0.3
 ggplot(DD,aes(tb,`NotTB Proportion`,
               size=N,col=mode,shape=clinical))+
     scale_x_continuous(label=comma,limits=c(0,NA))+
     scale_y_continuous(label=percent,limits=c(0,1))+
-    geom_point()+
+    geom_point(alpha=a)+
     xlab('WHO estimate of TB prevalence per 100,000 for country-year')+
     ylab('Proportion not TB in study')+
     ggtitle('Influence of population TB burden')
@@ -247,7 +247,7 @@ ggplot(DD,aes(hiv/1e2,`NotTB Proportion`,
               size=N,col=mode,shape=clinical))+
     scale_x_continuous(label=percent,limits=c(0,0.13))+
     scale_y_continuous(label=percent,limits=c(0,1))+
-    geom_point()+
+    geom_point(alpha=a)+
     xlab('UNAIDS estimate of HIV prevalence 15-49 for country-year')+
     ylab('Proportion not TB in study')+
     ggtitle('Influence of population HIV prevalence')
@@ -270,7 +270,7 @@ summary(hivmr)
 ggplot(DD,aes(Year,`NotTB Proportion`,
               size=N,col=mode,shape=clinical))+
     scale_y_continuous(label=percent,limits=c(0,1))+
-    geom_point()+
+    geom_point(alpha=a)+
     xlab('Study year')+
     ylab('Proportion not TB in study')+
     ggtitle('Influence of calendar year')
@@ -323,7 +323,7 @@ DD[,Country.Group:=factor(Country.Group,levels=unique(Country.Group))] #make fac
 ggplot(DD,aes(Country.Group,`NotTB Proportion`,
               size=N,col=mode,shape=clinical))+
     scale_y_continuous(label=percent,limits=c(0,1))+
-    geom_point()+
+    geom_point(alpha=a)+
     xlab('Country or country-group')+
     ylab('Proportion not TB in study')+
     ggtitle('Influence of region')
