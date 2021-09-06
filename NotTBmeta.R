@@ -167,7 +167,10 @@ B[,clinical.g:='Clinically diagnosed tuberculosis included']
 B[clinical=='(No unconfirmed TB)',
   clinical.g:='No clinically diagnosed tuberculosis included']
 B[mode=='Active',clinical.g:='']
-B[,mode:=factor(mode,levels=c('Passive','Active'),ordered = TRUE)]
+B[,mode:=paste0(mode,' case-finding')]
+B[,mode:=factor(mode,levels=c('Passive case-finding',
+                              'Active case-finding'),
+                ordered = TRUE)]
 B[,clinical.g:=factor(clinical.g,levels=unique(clinical.g))]
 labdat <- B[1]
 labdat[,txt:=' weight (%)']
